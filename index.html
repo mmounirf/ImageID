@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!--Import Google Icon Font-->
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection" />
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        .card .card-image img {
+            height: 250px!important;
+        }
+
+        .card .card-content p {
+            margin-top: 5%!important;
+        }
+
+        .card-content em {
+            color: #2196F3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h4>Enter Product ID</h4>
+            <p>Current available IDs:- 183, 180, 178, 173, 161</p>
+            <div class="input-field" style="display: inline-block; width: 90%;">
+                <input id="product_id" type="text" name="product_id" class="validate">
+                <label for="product_id">Product ID</label>
+            </div>
+            <a class="modal-action modal-close btn-floating btn-large waves-effect green accent-4" id="send_product_id"><i class="material-icons">done</i></a>
+
+        </div>
+
+    </div>
+    <div class="container">
+        <div class="row" style="text-align: center; margin-top: 5%;">
+            <a class="waves-effect waves-light btn-large light-blue" id="all_products">
+                <i class="material-icons left">play_arrow</i>Get All Products
+            </a>
+
+            <a class="waves-effect waves-light btn-large green accent-4" id="single_product">
+                <i class="material-icons left">play_arrow</i>Get Single Product
+            </a>
+
+            <a class="waves-effect waves-light btn-large red" id="product_review">
+                <i class="material-icons left">play_arrow</i>Get Product Review
+            </a>
+        </div>
+
+
+        <div class="row" style="text-align: center; margin-top: 5%;">
+            <div class="preloader-wrapper big active" id="loading" style="display:none; margin-top:5%;">
+                <div class="spinner-layer spinner-blue">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="gap-patch">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+
+                <div class="spinner-layer spinner-red">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="gap-patch">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+
+                <div class="spinner-layer spinner-yellow">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="gap-patch">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+
+                <div class="spinner-layer spinner-green">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="gap-patch">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row" id="result">
+
+            </div>
+
+
+
+        </div>
+    </div>
+
+
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="js/materialize.min.js"></script>
+    <script>
+        $(document).ready(function() {
+
+
+
+            $("#all_products").on("click", function(e) {
+
+                $("#loading").show();
+                $("#result").empty();
+                e.preventDefault();
+                $.ajax({
+                    url: "functions.php",
+                    type: 'GET',
+                    data: "function=get_all_products",
+                    dataType: 'json',
+                    complete: function(output) {
+                        data = JSON.parse(output.responseText);
+
+                        console.log("Requesting all products...");
+                        console.log(data.products);
+
+                        for (var i = 0; i < data.products.length; i++) {
+                            var product = data.products[i];
+                            var $p_id = product.id;
+                            var $p_title = product.title;
+                            var $p_img = product.featured_src;
+                            var $p_gallery = product.images;
+                            var $p_desc = product.description;
+                            var $p_s_desc = product.short_description;
+                            var $p_url = product.permalink;
+                            var $p_related = product.related_ids;
+                            var $p_style = product.attributes[0].options[0];
+                            var $p_category = product.attributes[1].options[0];
+                            var $p_type = product.attributes[2].options[0];
+
+                            $("#result").append("<div class='col m4'><div class='card'><div class='card-image'><img src='" + $p_img + "'></div><div class='card-content'><span class='card-title'>" + $p_title +
+                                "</span></br><em>" + $p_style + " / </em><em>" + $p_category + " / </em><em>" + $p_type + "</em>" + $p_s_desc + "</div><div class='card-action'><a href='" + $p_url +
+                                "'>View Product</a></div></div></div>");
+                        }
+
+                        $("#loading").hide();
+                    }
+                });
+            });
+
+            $("#single_product").on("click", function(e) {
+                $('#modal').openModal();
+                e.preventDefault();
+                $("#send_product_id").on("click", function(e) {
+                  e.preventDefault();
+                    $("#loading").show();
+                    $("#result").empty();
+                    var product_id = $("#product_id").val();
+
+                    $.ajax({
+                        url: "functions.php",
+                        type: 'GET',
+                        data: {
+                            "function": "get_single_product",
+                            "product_id": product_id
+                        },
+                        dataType: 'json',
+                        complete: function(output) {
+                          $("#result").empty();
+                            data = JSON.parse(output.responseText);
+                            $("#loading").hide();
+
+                            console.log("Requesting single product...");
+                            console.log(data.product);
+
+
+                            var product = data.product;
+                            var $p_id = data.product.id;
+                            var $p_title = product.title;
+                            var $p_img = product.featured_src;
+                            var $p_gallery = product.images;
+                            var $p_desc = product.description;
+                            var $p_s_desc = product.short_description;
+                            var $p_url = product.permalink;
+                            var $p_related = product.related_ids;
+                            var $p_style = product.attributes[0].options[0];
+                            var $p_category = product.attributes[1].options[0];
+                            var $p_type = product.attributes[2].options[0];
+
+                            $("#result").append("<div class='col m4'><div class='card'><div class='card-image'><img src='" + $p_img + "'></div><div class='card-content'><span class='card-title'>" + $p_title +
+                                "</span></br><em>" + $p_style + " / </em><em>" + $p_category + " / </em><em>" + $p_type + "</em>" + $p_s_desc + "</div><div class='card-action'><a href='" + $p_url +
+                                "'>View Product</a></div></div></div>");
+
+                            $("#loading").hide();
+
+
+                        }
+                    });
+
+                });
+            });
+
+
+
+        $("#product_review").on("click", function(e) {
+          $('#modal').openModal();
+          e.preventDefault();
+          $("#send_product_id").on("click", function(e) {
+            e.preventDefault();
+              $("#loading").show();
+              $("#result").empty();
+              var product_id = $("#product_id").val();
+
+              $.ajax({
+                  url: "functions.php",
+                  type: 'GET',
+                  data: {
+                      "function": "get_product_reviews",
+                      "product_id": product_id
+                  },
+                  dataType: 'json',
+                  complete: function(output) {
+                    $("#result").empty();
+                      data = JSON.parse(output.responseText);
+                      $("#loading").hide();
+
+                      var $reviews_count = data.product_reviews.length;
+                      console.log("Requesting product reviews...");
+                      console.log("Total number of reviews: "+$reviews_count);
+                      console.log(data.product_reviews);
+
+                      for (var i = 0; i < $reviews_count; i++) {
+                        var $reviews = data.product_reviews[i];
+                        var $p_review_text = $reviews.review;
+                        var $p_rating = $reviews.rating;
+                        var $p_reviewer = $reviews.reviewer_name;
+
+                        $("#result").append("<div class='col m4'><div class='card'><div class='card-content'>"+$p_review_text+" by <em>"+$p_reviewer+"</em></br></div></div></div>");
+                        for (var j=0; j<$p_rating; j++){
+                          $(".card-content").append("<i class='material-icons small icon-demo'>star</i>");
+                        }
+                      }
+
+
+
+
+
+
+                      $("#loading").hide();
+
+
+                  }
+              });
+
+          });
+        });
+            });
+    </script>
+</body>
+
+</html>
